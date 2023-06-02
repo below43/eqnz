@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html style="height:100%">
+<head>
+    <title>Shaking NZ Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+	html, body {
+            height: 100%;
+            margin: 0;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        .shake {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+#toast {
+    visibility: hidden;
+    min-width: 200px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 9999;  /* Higher z-index */
+    left: 50%;
+    bottom: 30px;
+    font-size: 17px;
+    opacity: 0;
+    transition: opacity 0.5s, visibility 0.5s;
+    font-family: sans-serif;
+}
+
+#toast.show {
+    visibility: visible;
+    opacity: 1;
+}
+div.credit
+{
+position: absolute;
+top: 10px;
+right: 20px;
+font-family: sans-serif;
+font-size: 8px;
+z-index: 9999;
+}
+    </style>
+</head>
+<body>
+<div id="toast">Elon killed the EQNZ Twitter feed, so here's an eqnz simulation instead</div>
+
+    <div id="map" class="shake"></div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    var map = L.map('map').setView([-40.9006, 174.8860], 6); // Center the map on New Zealand with zoom level 6
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+    }).addTo(map);
+document.addEventListener('DOMContentLoaded', (event) => {
+    var toastEl = document.getElementById("toast");
+    toastEl.className = "show";
+    setTimeout(function(){ toastEl.className = toastEl.className.replace("show", ""); }, 9000);
+});
+</script>
+<div class="credit">Made by <a href="andrew.drake.nz">andrew.drake.nz</a> [<a href="https://github.com/below43/eqnz">About this site</a>]</div>
+</body>
+</html>
