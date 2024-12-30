@@ -24,7 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
 	let previousPosts = [];
 
 	const fetchAndUpdatePosts = () => {
-		fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=25&sort=top')
+
+		document.getElementById('loading').style.display = 'block'; 
+
+		fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=24&sort=top')
 			.then(response => response.json())
 			.then(data => {
 				const posts = data.posts;
@@ -35,13 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
 					posts.forEach(post => {
 						const postCard = document.createElement('div');
 						postCard.className = 'post-card';
-						postCard.style.border = '1px solid #ddd';
-						postCard.style.padding = '10px';
-						postCard.style.margin = '10px 0';
-
-						const postContent = document.createElement('p');
-						postContent.textContent = post.record.text;
-						postCard.appendChild(postContent);
+						const postCardBody = document.createElement('div');
+						postCardBody.className = 'post-card-body';
 
 						const authorInfo = document.createElement('div');
 						authorInfo.style.display = 'flex';
@@ -51,10 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
 						if (post.author.avatar) {
 							const authorAvatar = document.createElement('img');
 							authorAvatar.src = post.author.avatar;
-							authorAvatar.style.width = '40px';
-							authorAvatar.style.height = '40px';
-							authorAvatar.style.borderRadius = '50%';
-							authorAvatar.style.marginRight = '10px';
+							authorAvatar.className = 'avatar';
 							authorInfo.appendChild(authorAvatar);
 						}
 
@@ -63,25 +58,32 @@ document.addEventListener('DOMContentLoaded', function() {
 						authorName.style.fontWeight = 'bold';
 						authorInfo.appendChild(authorName);
 
-						postCard.insertBefore(authorInfo, postCard.firstChild);
-						postCard.appendChild(document.createElement('br'));    
+						postCardBody.appendChild(authorInfo);
 
-						if (post.embed?.images[0]) {
+						const postContent = document.createElement('p');
+						postContent.textContent = post.record.text;
+						postCardBody.appendChild(postContent);
+
+						postCardBody.appendChild(document.createElement('br'));    
+
+						if (post.embed && post.embed.images && post.embed.images.length > 0) {
 							const postImage = document.createElement('img');
 							postImage.src = post.embed.images[0].thumb;
-							postImage.style.maxWidth = '100%';
-							postImage.style.maxHeight = '250px';
-							postCard.appendChild(postImage);
-							postCard.appendChild(document.createElement('br'));    
+							postImage.className = 'embed-image';
+							postCardBody.appendChild(postImage);
+							postCardBody.appendChild(document.createElement('br'));    
 						}
 
-						postCard.appendChild(document.createElement('br'));    
+						postCard.appendChild(postCardBody);
+
+						const footer = document.createElement('div');
+						footer.className = 'footer';
+
 						const postDate = document.createElement('p');
 						const postDateTime = new Date(post.record.createdAt).toLocaleString();
 						postDate.textContent = postDateTime;
-						postDate.style.fontSize = '12px';
-						postDate.style.color = '#555';
-						postCard.appendChild(postDate);
+						postDate.className = 'post-date';
+						footer.appendChild(postDate);
 
 						const postLink = document.createElement('a');
 						const postId = post.uri.split('/').pop();
@@ -89,16 +91,25 @@ document.addEventListener('DOMContentLoaded', function() {
 						postLink.textContent = 'View on Bluesky';
 						postLink.rel = 'nofollow';
 						postLink.target = '_blank';
-						postCard.appendChild(postLink);
+
+						const postLinkContainer = document.createElement('p');
+						postLinkContainer.appendChild(postLink);
+						footer.appendChild(postLinkContainer);
+
+						postCard.appendChild(document.createElement('br'));    
+						postCard.appendChild(footer);
 
 						blueskyPostsContainer.appendChild(postCard);
 					});
 
-					//loading div can now be hidden
-					document.getElementById('loading').style.display = 'none';
 				}
 			})
-			.catch(error => console.error('Error fetching Bluesky posts:', error));
+			.catch(error => console.error('Error fetching Bluesky posts:', error))
+			.finally(() => {
+				setTimeout(() => {
+					document.getElementById('loading').style.display = 'none'; 
+				}, 2000);
+			});
 	};
 
 	fetchAndUpdatePosts();
