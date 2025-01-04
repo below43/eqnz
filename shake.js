@@ -116,16 +116,10 @@ document.addEventListener('DOMContentLoaded', function ()
 						postDate.className = 'post-date';
 						footer.appendChild(postDate);
 
-						const postLink = document.createElement('a');
 						const postId = post.uri.split('/').pop();
-						postLink.href = `https://bsky.app/profile/${post.author.handle}/post/${postId}`;
-						postLink.textContent = 'View on Bluesky';
-						postLink.rel = 'nofollow';
-						postLink.target = '_blank';
-
-						const postLinkContainer = document.createElement('p');
-						postLinkContainer.appendChild(postLink);
-						footer.appendChild(postLinkContainer);
+						const blueskyUrl = `https://bsky.app/profile/${post.author.handle}/post/${postId}`;
+						const postLink = createLinkElement(blueskyUrl, 'View on Bluesky', 'main-post-link');
+						footer.appendChild(postLink);
 
 						postCard.appendChild(footer);
 
@@ -225,9 +219,9 @@ function processFacets(post, postText) {
         );
 }
 
-function createLinkElement(href, text) {
+function createLinkElement(href, text, className = '') {
     const container = document.createElement('p');
-    container.className = 'post-url';
+    container.className = className;
     
     const link = document.createElement('a');
     link.href = href;
@@ -249,7 +243,7 @@ function createConversationPostLink(post) {
         .replace('at://', 'https://bsky.app/profile/')
         .replace('app.bsky.feed.post', 'post');
 
-    return createLinkElement(webUrl, 'View conversation');
+    return createLinkElement(webUrl, 'View conversation', 'post-link');
 }
 
 function createEmbeddedPostLink(post) {
@@ -264,5 +258,5 @@ function createEmbeddedPostLink(post) {
         .replace('at://', 'https://bsky.app/profile/')
         .replace('app.bsky.feed.post', 'post');
 
-    return createLinkElement(webUrl, 'View quoted post');
+    return createLinkElement(webUrl, 'View quoted post', 'post-link');
 }
