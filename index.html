@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -8,10 +7,7 @@
 	<meta name="author" content="Andrew Drake">
 	<title>eqnz - Earthquake New Zealand Information Page</title>
 	<link rel="icon" href="favicon.ico" type="image/x-icon">
-
-	<!-- shake js and css -->
-	<script src="shake.js?v=4"></script>
-	<link href="shake.css?v=4" rel="stylesheet" />
+	<link rel="stylesheet" href="src/styles/main.css">
 </head>
 
 <body class="bg-light shake">
@@ -21,13 +17,14 @@
 		<div class="header">
 			<h1>EQNZ</h1>
 			<h2>NZ Earthquake Post Monitor</h2>
-			<p class="lead">Live monitor of #eqnz and geonet posts.</p>
+			<p class="lead">Live monitor of #eqnz Bluesky posts.</p>
 		</div>
 
 
 		<div id="bluesky-posts" class="bluesky-posts-container">
 			<!-- Bluesky posts will be inserted here -->
 		</div>
+		<script type="module" src="/src/index.js"></script>
 
 		<footer class="my-1 pt-5 text-muted text-justified text-small" style="max-width: 1024px; margin: 0 auto;">
 			<p class="">EQNZ.nz was built after the Sep 4 <a href="https://bsky.app/hashtag/chch" rel="nofollow">#chch</a> quake to monitor <a href="https://bsky.app/hashtag/eqnz" rel="nofollow">#eqnz</a> and geonet tweets. Following Twitter/X disabling their API and a subsequent mass-exodus, this site was updated to aggregate Bluesky posts in 2024.</p>
