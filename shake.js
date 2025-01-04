@@ -44,13 +44,8 @@ document.addEventListener('DOMContentLoaded', function ()
 					previousPosts = posts;
 					blueskyPostsContainer.innerHTML = ''; // Clear existing posts
 
-					//filter out replies
-					// posts = posts.filter(post => !post.record.reply);
-
-					// let count = 0;
 					posts.forEach(post =>
 					{
-						// console.log(++count, post.record.text.substring(0, 50));
 						const postCard = document.createElement('div');
 						postCard.className = 'post-card';
 						const postCardBody = document.createElement('div');
@@ -178,94 +173,63 @@ function generateLink(feature, linkText)
 
 	return types[feature.$type]?.() || null;
 }
+function byteToCharIndex(text, byteIndex) {
+    if (!text?.length || typeof text !== 'string') return 0;
+    if (typeof byteIndex !== 'number' || byteIndex < 0) return 0;
+    if (byteIndex === 0) return 0;
 
-function byteToCharIndex(text, byteIndex)
-{
-	// Input validation
-	if (!text || typeof text !== 'string')
-	{
-		console.warn('Invalid text input:', text);
-		return 0;
-	}
-	if (typeof byteIndex !== 'number' || byteIndex < 0)
-	{
-		console.warn('Invalid byte index:', byteIndex);
-		return 0;
-	}
-	if (byteIndex === 0) return 0;
+    try {
+        const encoder = new TextEncoder();
+        let byteCount = 0;
+        let charIndex = 0;
 
-	const encoder = new TextEncoder();
-	let byteCount = 0;
-	let charIndex = 0;
-
-	try
-	{
-		while (byteCount < byteIndex && charIndex < text.length)
-		{
-			const char = text[charIndex];
-			const charBytes = encoder.encode(char).length;
-			byteCount += charBytes;
-			charIndex++;
-		}
-		return charIndex;
-	} catch (error)
-	{
-		console.error('Error processing text:', error);
-		return 0;
-	}
+        while (byteCount < byteIndex && charIndex < text.length) {
+            byteCount += encoder.encode(text[charIndex++]).length;
+        }
+        return charIndex;
+    } catch (error) {
+        console.error('Error converting bytes to chars:', error);
+        return 0;
+    }
 }
 
-function processFacets(post, postText)
-{
-	if (!post?.record?.facets)
-	{
-		return postText;
-	}
+function createLinkReplacement(start, end, linkInfo, text) {
+    if (!linkInfo || start === undefined || end === undefined || 
+        start > end || end > text.length) {
+        return null;
+    }
 
-	// Debug logging
-	// console.log('Original text:', postText);
-	// console.log('Facets:', post.record.facets);
+    return {
+        start,
+        end,
+        replacement: `<a href="${linkInfo.href}" target="_blank" rel="nofollow">${linkInfo.text}</a>`
+    };
+}
 
-	const replacements = post.record.facets
-		.filter(facet => facet.features && facet.index)
-		.flatMap(facet =>
-		{
-			const start = byteToCharIndex(postText, facet.index.byteStart);
-			const end = byteToCharIndex(postText, facet.index.byteEnd);
+function processFacets(post, postText) {
+    if (!post?.record?.facets?.length) return postText;
 
-			// Validation
-			if (start === undefined || end === undefined || start > end || end > postText.length)
-			{
-				console.warn('Invalid indices:', { start, end, text: postText });
-				return [];
-			}
+    const replacements = post.record.facets
+        .filter(facet => facet.features?.length && facet.index)
+        .flatMap(facet => {
+            const start = byteToCharIndex(postText, facet.index.byteStart);
+            const end = byteToCharIndex(postText, facet.index.byteEnd);
+            const linkText = postText.substring(start, end);
 
-			const linkText = postText.substring(start, end);
-			// console.log('Processing facet:', { start, end, linkText, originalBytes: facet.index });
+            return facet.features
+                .map(feature => createLinkReplacement(
+                    start, 
+                    end, 
+                    generateLink(feature, linkText), 
+                    postText
+                ))
+                .filter(Boolean);
+        });
 
-			return facet.features
-				.map(feature =>
-				{
-					const linkInfo = generateLink(feature, linkText);
-					if (!linkInfo) return null;
-
-					return {
-						start,
-						end,
-						replacement: `<a href="${linkInfo.href}" target="_blank" rel="nofollow">${linkInfo.text}</a>`
-					};
-				})
-				.filter(Boolean);
-		});
-
-	const result = replacements
-		.sort((a, b) => b.start - a.start)
-		.reduce((text, { start, end, replacement }) =>
-		{
-			// console.log('Applying replacement:', { start, end, replacement });
-			return text.slice(0, start) + replacement + text.slice(end);
-		}, postText);
-
-	// console.log('Final text:', result);
-	return result;
+    return replacements
+        .sort((a, b) => b.start - a.start)
+        .reduce((text, { start, end, replacement }) => 
+            text.slice(0, start) + replacement + text.slice(end), 
+            postText
+        );
 }
