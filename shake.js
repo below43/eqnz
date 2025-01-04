@@ -30,10 +30,13 @@ document.addEventListener('DOMContentLoaded', function() {
 		fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=24&sort=latest')
 			.then(response => response.json())
 			.then(data => {
-				const posts = data.posts;
+				let posts = data.posts;
 				if (JSON.stringify(posts) !== JSON.stringify(previousPosts)) {
 					previousPosts = posts;
 					blueskyPostsContainer.innerHTML = ''; // Clear existing posts
+
+					//filter out replies
+					posts = posts.filter(post => !post.record.reply);
 
 					posts.forEach(post => {
 						const postCard = document.createElement('div');
