@@ -1,0 +1,16 @@
+{
+	"name": "EQNZ",
+	"short_name": "EQNZ",
+	"description": "Live monitor of #eqnz Bluesky posts",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#000000",
+	"icons": [
+		{
+			"src": "/icons/icon.png",
+			"sizes": "1024x1024",
+			"type": "image/png"
+		}
+	]
+}

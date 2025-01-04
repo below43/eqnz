@@ -28,7 +28,7 @@ class App {
             this.updatePosts(posts);
         } catch (error) {
             this.handleError(error);
-        } finally {
+        } finally {``
             setTimeout(() => {
                 this.setLoading(false);
             }, CONFIG.INTERVALS.LOADING);
