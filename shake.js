@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		document.getElementById('loading').style.display = 'block'; 
 
-		fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=24&sort=top')
+		fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=24&sort=latest')
 			.then(response => response.json())
 			.then(data => {
 				const posts = data.posts;
