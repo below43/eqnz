@@ -158,6 +158,7 @@ footer {
 div.container {
 	max-width: 2500px;
 	margin: 0 auto;
+	padding: 0 20px;
 }
 
 div.header {
