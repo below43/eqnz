@@ -1,5 +1,3 @@
-//github copilot generated code
-
 window.onload = function ()
 {
 	var shake = function ()
@@ -22,126 +20,143 @@ window.onload = function ()
 			shakeInterval();
 		}, rand);
 	}
-	// shakeInterval();
 }
+
 document.addEventListener('DOMContentLoaded', function ()
 {
-	const blueskyPostsContainer = document.getElementById('bluesky-posts');
-	let previousPosts = [];
-
-	const fetchAndUpdatePosts = () =>
-	{
-
-		document.getElementById('loading').style.display = 'block';
-
-		fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=25&sort=latest')
-			.then(response => response.json())
-			.then(data =>
-			{
-				let posts = data.posts;
-				if (JSON.stringify(posts) !== JSON.stringify(previousPosts))
-				{
-					previousPosts = posts;
-					blueskyPostsContainer.innerHTML = ''; // Clear existing posts
-
-					posts.forEach(post =>
-					{
-						const postCard = document.createElement('div');
-						postCard.className = 'post-card';
-						const postCardBody = document.createElement('div');
-						postCardBody.className = 'post-card-body';
-
-						const authorInfo = document.createElement('div');
-						authorInfo.style.display = 'flex';
-						authorInfo.style.alignItems = 'center';
-						authorInfo.style.marginBottom = '10px';
-
-						if (post.author.avatar)
-						{
-							const authorAvatar = document.createElement('img');
-							authorAvatar.src = post.author.avatar;
-							authorAvatar.className = 'avatar';
-							authorInfo.appendChild(authorAvatar);
-						}
-
-						const authorName = document.createElement('span');
-						authorName.textContent = post.author.displayName || post.author.handle;
-						authorName.style.fontWeight = 'bold';
-						authorInfo.appendChild(authorName);
-
-						postCardBody.appendChild(authorInfo);
-
-						let postText = post.record.text;
-
-						// Check for link and tag facets and inject links if they exist
-						postText = processFacets(post, postText);
-
-						const postContent = document.createElement('p');
-						postContent.innerHTML = postText;
-						postCardBody.appendChild(postContent);
-
-						if (conversationPostLink = createConversationPostLink(post)) 
-						{
-							postCardBody.appendChild(conversationPostLink);
-						}
-
-						if (embeddedPostLink = createEmbeddedPostLink(post))
-						{
-							postCardBody.appendChild(embeddedPostLink);
-						}
-
-						if (post.embed && post.embed.images && post.embed.images.length > 0)
-						{
-							const postImage = document.createElement('img');
-							postImage.src = post.embed.images[0].thumb;
-							postImage.className = 'embed-image';
-							postCardBody.appendChild(document.createElement('br'));
-							postCardBody.appendChild(postImage);
-						}
-
-						if ((!post.embed || !post.embed.images || post.embed.images.length === 0) &&
-							!post.record.reply)
-						{
-							postCardBody.appendChild(document.createElement('br'));
-						}
-
-						postCard.appendChild(postCardBody);
-
-						const footer = document.createElement('div');
-						footer.className = 'footer';
-
-						const postDate = document.createElement('p');
-						const postDateTime = new Date(post.record.createdAt).toLocaleString();
-						postDate.textContent = postDateTime;
-						postDate.className = 'post-date';
-						footer.appendChild(postDate);
-
-						const postId = post.uri.split('/').pop();
-						const blueskyUrl = `https://bsky.app/profile/${post.author.handle}/post/${postId}`;
-						const postLink = createLinkElement(blueskyUrl, 'View on Bluesky', 'main-post-link');
-						footer.appendChild(postLink);
-
-						postCard.appendChild(footer);
-
-						blueskyPostsContainer.appendChild(postCard);
-					});
-
-				}
-			})
-			.catch(error => console.error('Error fetching Bluesky posts:', error))
-			.finally(() =>
-			{
-				setTimeout(() =>
-				{
-					document.getElementById('loading').style.display = 'none';
-				}, 2000);
-			});
-	};
-
 	fetchAndUpdatePosts();
 	setInterval(fetchAndUpdatePosts, 30000); // Fetch and update every 30 seconds
 });
 
+let previousPosts = [];
+function fetchAndUpdatePosts() {
+    document.getElementById('loading').style.display = 'block';
+
+    fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=25&sort=latest')
+        .then(response => response.json())
+        .then(data => {
+            if (JSON.stringify(data.posts) !== JSON.stringify(previousPosts)) {
+                previousPosts = data.posts;
+                const container = document.getElementById('bluesky-posts');
+                container.innerHTML = '';
+                data.posts.forEach(post => {
+                    container.appendChild(renderPost(post));
+                });
+            }
+        })
+        .catch(error => console.error('Error fetching Bluesky posts:', error))
+        .finally(() => {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 2000);
+        });
+}
+
+/**
+ * @typedef {Object} BlueskyPost
+ * @property {Object} record
+ * @property {Object} author
+ * @property {Object} embed
+ */
+
+// URL utilities
+const urlUtils = {
+    convertAtProtocolUrl(atUri) {
+        return atUri
+            .replace('at://', 'https://bsky.app/profile/')
+            .replace('app.bsky.feed.post', 'post');
+    },
+
+    createPostUrl(handle, postId) {
+        return `https://bsky.app/profile/${handle}/post/${postId}`;
+    }
+};
+
+/**
+ * @param {BlueskyPost} post
+ * @returns {HTMLElement}
+ */
+function renderPost(post) {
+    const postCard = document.createElement('div');
+    postCard.className = 'post-card';
+    
+    const postCardBody = createPostBody(post);
+    const footer = createPostFooter(post);
+    
+    postCard.appendChild(postCardBody);
+    postCard.appendChild(footer);
+    
+    return postCard;
+}
+
+function createPostBody(post) {
+    const body = document.createElement('div');
+    body.className = 'post-card-body';
+
+    body.appendChild(createAuthorInfo(post.author));
+    body.appendChild(createPostContent(post));
+    
+    if (post.embed?.images?.length > 0) {
+        body.appendChild(createPostImage(post.embed.images[0]));
+    }
+
+    return body;
+}
+
+function createAuthorInfo(author) {
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.marginBottom = '10px';
+
+    if (author.avatar) {
+        const avatar = document.createElement('img');
+        avatar.src = author.avatar;
+        avatar.className = 'avatar';
+        container.appendChild(avatar);
+    }
+
+    const name = document.createElement('span');
+    name.textContent = author.displayName || author.handle;
+    name.style.fontWeight = 'bold';
+    container.appendChild(name);
+
+    return container;
+}
+
+function createPostContent(post) {
+    const container = document.createElement('div');
+    
+    const text = processFacets(post, post.record.text);
+    const content = document.createElement('p');
+    content.innerHTML = text;
+    container.appendChild(content);
+
+    const conversationLink = createConversationPostLink(post);
+    if (conversationLink) container.appendChild(conversationLink);
+
+    const embeddedLink = createEmbeddedPostLink(post);
+    if (embeddedLink) container.appendChild(embeddedLink);
+
+    return container;
+}
+
+function createPostFooter(post) {
+    const footer = document.createElement('div');
+    footer.className = 'footer';
+
+    const date = document.createElement('p');
+    date.textContent = new Date(post.record.createdAt).toLocaleString();
+    date.className = 'post-date';
+    footer.appendChild(date);
+
+    const postId = post.uri.split('/').pop();
+    const url = urlUtils.createPostUrl(post.author.handle, postId);
+    const link = createLinkElement(url, 'View on Bluesky', 'main-post-link');
+    footer.appendChild(link);
+
+    return footer;
+}
 
 function generateLink(feature, linkText)
 {
@@ -158,6 +173,7 @@ function generateLink(feature, linkText)
 
 	return types[feature.$type]?.() || null;
 }
+
 function byteToCharIndex(text, byteIndex) {
     if (!text?.length || typeof text !== 'string') return 0;
     if (typeof byteIndex !== 'number' || byteIndex < 0) return 0;
