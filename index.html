@@ -6,29 +6,17 @@
 		<meta name="description" content="NZ Earthquake Post Monitor - Live feed of #eqnz tweets">
 		<meta name="author" content="Andrew Drake">
 		<title>eqnz - Earthquake New Zealand Information Page</title>
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
 
-
-		<!-- Bootstrap core CSS -->
-		<link href="bootstrap.min.css" rel="stylesheet" />
 		<!-- shake js and css -->
-		<script src="shake.js?v=3"></script>
-		<link href="shake.css?v=3" rel="stylesheet" />
-
-		<!-- Global site tag (gtag.js) - Google Analytics -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-1270728-11"></script>
-		<script>
-		window.dataLayer = window.dataLayer || [];
-			function gtag(){dataLayer.push(arguments);}
-			gtag('js', new Date());
-
-			gtag('config', 'UA-1270728-11');
-		</script>
+		<script src="shake.js?v=4"></script>
+		<link href="shake.css?v=4" rel="stylesheet" />
 	</head>
 	<body class="bg-light shake">
 		<div id="loading"></div>
 
 		<div class="container" style="max-width:2500px">
-			<div class="py-5s text-center" style="padding-top: 20px; padding-bottom: 0 !important;">
+			<div class="header">
 				<h1>EQNZ</h1>
 				<h2>NZ Earthquake Post Monitor</h2>
 				<p class="lead">Live monitor of #eqnz and geonet posts.</p>
@@ -42,10 +30,7 @@
 			<footer class="my-1 pt-5 text-muted text-justified text-small" style="max-width: 1024px; margin: 0 auto;">
 				<p class="">EQNZ.nz was built post Sep 4 #chch quake to monitor <a href="https://bsky.app/hashtag/eqnz" rel="nofollow">#eqnz</a> and geonet tweets. Following Twitter/X disabling their API and a subsequent mass-exodus, this site was updated to aggregate Bluesky posts in 2024.</p>
 				<p class="mb-1">&copy; 2011-<script>document.write(new Date().getFullYear());</script> Andrew Drake</p>
-				<ul class="list-inline">
-					<li class="list-inline-item"><a href="https://bsky.app/profile/andrew.drake.nz">@andrew.drake.nz</a></li>
-					<!-- <li class="list-inline-item"><a href="https://andrew.drake.nz">about me</a></li> -->
-				</ul>
+				<p><a href="https://bsky.app/profile/andrew.drake.nz">@andrew.drake.nz</a></p>
 			</footer>
 		</div>
 
