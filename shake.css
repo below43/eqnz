@@ -210,3 +210,7 @@ a {
 a:hover {
 	text-decoration: underline;
 }
+
+p.post-url a {
+	color: #999;
+}

@@ -80,23 +80,14 @@ document.addEventListener('DOMContentLoaded', function ()
 						postContent.innerHTML = postText;
 						postCardBody.appendChild(postContent);
 
-						// Add reply link if post is a reply
-						if (post.record.reply)
+						if (conversationPostLink = createConversationPostLink(post)) 
 						{
-							const replyLink = document.createElement('a');
-							const parentUri = post.record.reply.parent.uri;
-							// Convert AT Protocol URI to bsky.app URL
-							const webUrl = parentUri.replace('at://', 'https://bsky.app/profile/').replace('app.bsky.feed.post', 'post');
-							replyLink.href = webUrl;
-							replyLink.target = '_blank';
-							replyLink.rel = 'nofollow';
-							replyLink.textContent = 'View conversation';
-							replyLink.style.color = '#999';
-							replyLink.style.textDecoration = 'none';
+							postCardBody.appendChild(conversationPostLink);
+						}
 
-							const replyContainer = document.createElement('p');
-							replyContainer.appendChild(replyLink);
-							postCardBody.appendChild(replyContainer);
+						if (embeddedPostLink = createEmbeddedPostLink(post))
+						{
+							postCardBody.appendChild(embeddedPostLink);
 						}
 
 						if (post.embed && post.embed.images && post.embed.images.length > 0)
@@ -232,4 +223,46 @@ function processFacets(post, postText) {
             text.slice(0, start) + replacement + text.slice(end), 
             postText
         );
+}
+
+function createLinkElement(href, text) {
+    const container = document.createElement('p');
+    container.className = 'post-url';
+    
+    const link = document.createElement('a');
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'nofollow';
+    link.textContent = ` ${text}`;
+    
+    container.appendChild(link);
+    return container;
+}
+
+function createConversationPostLink(post) {
+    if (!post?.record?.reply?.parent?.uri) {
+        return null;
+    }
+
+    const parentUri = post.record.reply.parent.uri;
+    const webUrl = parentUri
+        .replace('at://', 'https://bsky.app/profile/')
+        .replace('app.bsky.feed.post', 'post');
+
+    return createLinkElement(webUrl, 'View conversation');
+}
+
+function createEmbeddedPostLink(post) {
+    if (!post.embed || post.embed.$type !== 'app.bsky.embed.record#view') {
+        return null;
+    }
+
+    const record = post.embed.record;
+    if (!record?.uri) return null;
+
+    const webUrl = record.uri
+        .replace('at://', 'https://bsky.app/profile/')
+        .replace('app.bsky.feed.post', 'post');
+
+    return createLinkElement(webUrl, 'View quoted post');
 }
