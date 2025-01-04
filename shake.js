@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function ()
 
 		document.getElementById('loading').style.display = 'block';
 
-		fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=24&sort=latest')
+		fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=25&sort=latest')
 			.then(response => response.json())
 			.then(data =>
 			{
@@ -47,8 +47,10 @@ document.addEventListener('DOMContentLoaded', function ()
 					//filter out replies
 					// posts = posts.filter(post => !post.record.reply);
 
+					// let count = 0;
 					posts.forEach(post =>
 					{
+						// console.log(++count, post.record.text.substring(0, 50));
 						const postCard = document.createElement('div');
 						postCard.className = 'post-card';
 						const postCardBody = document.createElement('div');
@@ -83,13 +85,31 @@ document.addEventListener('DOMContentLoaded', function ()
 						postContent.innerHTML = postText;
 						postCardBody.appendChild(postContent);
 
-						postCardBody.appendChild(document.createElement('br'));
+						// Add reply link if post is a reply
+						if (post.record.reply)
+						{
+							const replyLink = document.createElement('a');
+							const parentUri = post.record.reply.parent.uri;
+							// Convert AT Protocol URI to bsky.app URL
+							const webUrl = parentUri.replace('at://', 'https://bsky.app/profile/').replace('app.bsky.feed.post', 'post');							
+							replyLink.href = webUrl;
+							replyLink.target = '_blank';
+							replyLink.rel = 'nofollow';
+							replyLink.textContent = 'View conversation';
+							replyLink.style.color = '#999';
+							replyLink.style.textDecoration = 'none';
+							
+							const replyContainer = document.createElement('p');
+							replyContainer.appendChild(replyLink);
+							postCardBody.appendChild(replyContainer);
+						}
 
 						if (post.embed && post.embed.images && post.embed.images.length > 0)
 						{
 							const postImage = document.createElement('img');
 							postImage.src = post.embed.images[0].thumb;
 							postImage.className = 'embed-image';
+							postCardBody.appendChild(document.createElement('br'));
 							postCardBody.appendChild(postImage);
 							postCardBody.appendChild(document.createElement('br'));
 						}
