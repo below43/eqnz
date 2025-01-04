@@ -91,14 +91,14 @@ document.addEventListener('DOMContentLoaded', function ()
 							const replyLink = document.createElement('a');
 							const parentUri = post.record.reply.parent.uri;
 							// Convert AT Protocol URI to bsky.app URL
-							const webUrl = parentUri.replace('at://', 'https://bsky.app/profile/').replace('app.bsky.feed.post', 'post');							
+							const webUrl = parentUri.replace('at://', 'https://bsky.app/profile/').replace('app.bsky.feed.post', 'post');
 							replyLink.href = webUrl;
 							replyLink.target = '_blank';
 							replyLink.rel = 'nofollow';
 							replyLink.textContent = 'View conversation';
 							replyLink.style.color = '#999';
 							replyLink.style.textDecoration = 'none';
-							
+
 							const replyContainer = document.createElement('p');
 							replyContainer.appendChild(replyLink);
 							postCardBody.appendChild(replyContainer);
@@ -111,6 +111,11 @@ document.addEventListener('DOMContentLoaded', function ()
 							postImage.className = 'embed-image';
 							postCardBody.appendChild(document.createElement('br'));
 							postCardBody.appendChild(postImage);
+						}
+
+						if ((!post.embed || !post.embed.images || post.embed.images.length === 0) &&
+							!post.record.reply)
+						{
 							postCardBody.appendChild(document.createElement('br'));
 						}
 
@@ -136,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function ()
 						postLinkContainer.appendChild(postLink);
 						footer.appendChild(postLinkContainer);
 
-						postCard.appendChild(document.createElement('br'));
 						postCard.appendChild(footer);
 
 						blueskyPostsContainer.appendChild(postCard);
