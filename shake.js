@@ -29,12 +29,25 @@ document.addEventListener('DOMContentLoaded', function ()
 });
 
 let previousPosts = [];
+let isLoading = false;
 function fetchAndUpdatePosts() {
-    document.getElementById('loading').style.display = 'block';
+    if (isLoading) return;
+    isLoading = true;
+    
+    const loadingElement = document.getElementById('loading');
+    loadingElement.style.display = 'block';
 
     fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23eqnz&limit=25&sort=latest')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (!data?.posts) {
+                throw new Error('Invalid response format');
+            }
             if (JSON.stringify(data.posts) !== JSON.stringify(previousPosts)) {
                 previousPosts = data.posts;
                 const container = document.getElementById('bluesky-posts');
@@ -44,10 +57,16 @@ function fetchAndUpdatePosts() {
                 });
             }
         })
-        .catch(error => console.error('Error fetching Bluesky posts:', error))
+        .catch(error => {
+            console.error('Error fetching Bluesky posts:', error);
+            // Add user-facing error message
+            const container = document.getElementById('bluesky-posts');
+            container.innerHTML = `<div class="error">Failed to load posts: ${error.message}</div>`;
+        })
         .finally(() => {
             setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
+                loadingElement.style.display = 'none';
+                isLoading = false;
             }, 2000);
         });
 }
@@ -77,6 +96,10 @@ const urlUtils = {
  * @returns {HTMLElement}
  */
 function renderPost(post) {
+	if (!post?.author || !post?.record) {
+        console.error('Invalid post data:', post);
+        return document.createElement('div'); // Return empty div instead of failing
+    }
     const postCard = document.createElement('div');
     postCard.className = 'post-card';
     
@@ -95,10 +118,6 @@ function createPostBody(post) {
 
     body.appendChild(createAuthorInfo(post.author));
     body.appendChild(createPostContent(post));
-    
-    if (post.embed?.images?.length > 0) {
-        body.appendChild(createPostImage(post.embed.images[0]));
-    }
 
     return body;
 }
@@ -138,6 +157,9 @@ function createPostContent(post) {
     const embeddedLink = createEmbeddedPostLink(post);
     if (embeddedLink) container.appendChild(embeddedLink);
 
+	const image = createPostImage(post);
+	if (image) container.appendChild(image);
+
     return container;
 }
 
@@ -174,18 +196,18 @@ function generateLink(feature, linkText)
 	return types[feature.$type]?.() || null;
 }
 
+const textEncoder = new TextEncoder();
 function byteToCharIndex(text, byteIndex) {
     if (!text?.length || typeof text !== 'string') return 0;
     if (typeof byteIndex !== 'number' || byteIndex < 0) return 0;
     if (byteIndex === 0) return 0;
 
     try {
-        const encoder = new TextEncoder();
         let byteCount = 0;
         let charIndex = 0;
 
         while (byteCount < byteIndex && charIndex < text.length) {
-            byteCount += encoder.encode(text[charIndex++]).length;
+            byteCount += textEncoder.encode(text[charIndex++]).length;
         }
         return charIndex;
     } catch (error) {
@@ -247,6 +269,22 @@ function createLinkElement(href, text, className = '') {
     
     container.appendChild(link);
     return container;
+}
+
+function createPostImage(post) {
+	if (!post?.embed?.images?.length) {
+		return null;
+	}
+
+	const postImage = document.createElement('img');
+	postImage.src = post.embed.images[0].thumb;
+	postImage.className = 'embed-image';
+
+	const container = document.createElement('div');
+	container.appendChild(document.createElement('br'));
+	container.appendChild(postImage);
+
+	return container;
 }
 
 function createConversationPostLink(post) {
