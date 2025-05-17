@@ -1,7 +1,7 @@
 
 export const CONFIG = {
     API: {
-        BASE_URL: 'https://public.api.bsky.app/xrpc',
+        BASE_URL: 'https://api.bsky.app/xrpc',
         ENDPOINTS: {
             SEARCH_POSTS: '/app.bsky.feed.searchPosts'
         }

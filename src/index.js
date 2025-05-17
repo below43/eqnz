@@ -1,6 +1,6 @@
 import { PostAPI } from './api/postApi.js';
 import { PostRenderer } from './components/PostRenderer.js';
-import { CONFIG } from './config/config.js';
+import { CONFIG } from './config/config.js?v=2';
 
 class App
 {
